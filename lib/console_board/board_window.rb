@@ -23,6 +23,7 @@ module ConsoleBoard
 
     def format!
       xs = Array.new(vertical_length) { position.x }
+      x = position.x
       y = position.y
       @all_cells.each do |cul|
         position.y = y
@@ -39,6 +40,8 @@ module ConsoleBoard
           end
         end
       end
+      position.x = x
+      position.y = y
     end
 
     def as_text
