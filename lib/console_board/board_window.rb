@@ -59,26 +59,14 @@ module ConsoleBoard
       super
     end
 
-    def [] *args
-      value = args.pop
-      x, y = args
-      fail
+    def [] x, y
+      @all_cells[x][y].object
     end
 
     # :call-seq:
     # self[x, y] = value   -> value
-    def []= *args
-      value = args.pop
-      x, y = args
-
-      if y
-        @all_cells[x][y].object = value
-      else
-        raise ArgumentError
-        # raise TypeError, "Can't convert #{value.class} into Array" unless value.respond_to? :to_ary
-        # @all_cells[x] = value.to_ary.map { |a| Cell.new.tap { |c| c.object = a } }
-      end
-      value
+    def []= x, y, value
+      @all_cells[x][y].object = value
     end
   end
 end

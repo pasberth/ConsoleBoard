@@ -12,6 +12,7 @@ describe ConsoleBoard::BoardWindow do
     end
 
     its(:as_text) { should include 'A' }
+    its([0, 0]) { should == 'A' }
   end
 
   describe "Shogi" do
