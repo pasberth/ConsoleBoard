@@ -14,6 +14,7 @@ describe ConsoleBoard::BoardWindow do
     its(:as_text) { should include 'A' }
     its([0, 0]) { should == 'A' }
     its('each.to_a') { should == [['A', nil, nil, nil, nil], [nil]*5, [nil]*5, [nil]*5, [nil]*5] }
+    its([6, 6]) { should be_nil }
   end
 
   describe "Shogi" do

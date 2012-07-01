@@ -72,6 +72,7 @@ module ConsoleBoard
     end
 
     def [] x, y
+      return if @all_cells[x].nil? || @all_cells[x][y].nil?
       @all_cells[x][y].object
     end
 
