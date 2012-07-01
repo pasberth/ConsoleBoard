@@ -6,6 +6,8 @@ module ConsoleBoard
 
     require 'console_board/board_window/cell'
 
+    include Enumerable
+
     def initialize horizontal_length, vertical_length, attritbes = {}
       super(attritbes)
       @all_cells = Array.new(vertical_length) { Array.new(horizontal_length) { Cell.new } }
@@ -57,6 +59,16 @@ module ConsoleBoard
     def as_displayed_text
       format!
       super
+    end
+
+    def each &block
+      if block_given?
+        @all_cells.each do |cul|
+          block.call cul.map(&:object)
+        end
+      else
+        Enumerator.new(self, :each)
+      end
     end
 
     def [] x, y
