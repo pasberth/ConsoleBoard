@@ -106,6 +106,7 @@ module Othello
           end
 
       x.zip(y) do |i, j|
+        return unless i and j
         callback.call(i, j)
       end
     end
