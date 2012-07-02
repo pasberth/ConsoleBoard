@@ -8,6 +8,8 @@ module Othello
     BOARD_WIDTH = 8
     BOARD_HEIGHT = 8
 
+    attr_reader :window
+
     def initialize
     
       @window = ConsoleBoard::BoardWindow.new(BOARD_WIDTH, BOARD_HEIGHT, :curses_window => Curses.stdscr)
@@ -32,7 +34,7 @@ module Othello
       @window.lines[INFO_AREA_LINE_N] = 'Info Area'
       @window.lines[COMMAND_LINE_N] = 'Command line'
 
-      @players = [Player.new(BLACK), Player.new(WHITE)]
+      @players = [Person.new(self, BLACK), Com.new(self, WHITE)]
       @turn_player = @players.first
       @turn_player_n = 0
     end
@@ -44,6 +46,15 @@ module Othello
         end
       end
     end
+
+    def next_turn
+      @turn_player = @players[@turn_player_n += 1] || @players[@turn_player_n = 0]
+      view_info "next turn is #{@turn_player.color}."
+    end
+
+    # ====================
+    # View 
+    # ====================
 
     def view_info msg
       @window.lines[INFO_AREA_LINE_N] = msg
@@ -58,26 +69,90 @@ module Othello
       @window.gets
     end
 
+    # ====================
+    # Command
+    # ====================
+
+
     def command cmd
       case cmd
-      when /^help/ then help
+      when /^help\s+(.*)/ then help $1
       when /^put/ then put
       when /^pass/ then pass
       end
     end
 
-    def help
-      view_info "Type 'put', put a stone onto the board."
+    def help cmd
+      case cmd
+      when /^put/
+        view_info "Put a stone onto the board."
+      when /^pass/
+        view_info "Pass the turn."
+      when /^exit/
+        view_info "Exit the game."
+      else
+        view_info "Type 'help <command>', put a stone onto the board."
+      end
     end
 
+    def pass
+      @turn_player.passed = true
+      next_turn
+    end
+
+    def put
+      (x, y = select) or return
+
+      trace_put(x, y, 1, 0)
+      trace_put(x, y, 0, 1)
+      trace_put(x, y, -1, 0)
+      trace_put(x, y, 0, -1)
+      trace_put(x, y, 1, 1)
+      trace_put(x, y, -1, -1)
+      trace_put(x, y, 1, -1)
+      trace_put(x, y, -1, 1)
+
+      @stones[x][y] = Stone.new(@turn_player.color)
+      sync_stones_onto_window
+
+      @turn_player.passed = false      
+      next_turn
+    end
+
+    def trace_put start_x, start_y, direction_x, direction_y
+      return if @stones[start_x][start_y]
+
+      targets = []
+      trace(start_x, start_y, direction_x, direction_y) do |i, j|
+        if @stones[i][j].nil?
+          break
+        elsif @stones[i][j].color != @turn_player.color
+          targets << [i, j]
+        elsif @stones[i][j].color == @turn_player.color
+          targets.each do |k, l|
+            @stones[k][l] = Stone.new(@turn_player.color)
+          end
+
+          break
+        end
+      end
+    end
+
+    def select
+      @turn_player.select
+    end
+
+    # ====================
+    # Helpers
+    # ====================
+
     def selections
-      color = @turn_player.color
       selections = []
 
-      @window.each_with_index do |cul, i|
+      @stones.each_with_index do |cul, i|
         cul.each_with_index do |stone, j|
           next unless stone
-          next if stone.color != color
+          next if stone.color != @turn_player.color
 
           selections << selection(i, j, 1, 0)
           selections << selection(i, j, 0, 1)
@@ -91,6 +166,25 @@ module Othello
       end
 
       selections.compact.uniq
+    end
+
+    def selection start_x, start_y, direction_x, direction_y
+
+      flag = false
+      tgt = nil
+
+      trace(start_x, start_y, direction_x, direction_y) do |i, j|
+        if @stones[i][j].nil?
+          tgt = [i, j]
+          break
+        elsif @stones[i][j].color == @turn_player.color
+          break
+        elsif @stones[i][j].color != @turn_player.color
+          flag = true
+        end
+      end
+
+      flag ? tgt : nil
     end
 
     def trace start_x, start_y, direction_x, direction_y, &callback
@@ -116,101 +210,20 @@ module Othello
       end
     end
 
-    def selection start_x, start_y, direction_x, direction_y
-
-      flag = false
-      tgt = nil
-
-      trace(start_x, start_y, direction_x, direction_y) do |i, j|
-        if @window[i, j].nil?
-          tgt = [i, j]
-          break
-        elsif @window[i, j].color == @turn_player.color
-          break
-        elsif @window[i, j].color != @turn_player.color
-          flag = true
-        end
-      end
-
-      flag ? tgt : nil
-    end
-
-    def select
-      ss = selections
-
-      ss.each do |x, y|
-        @window[x, y] = "%d,%d" % [x, y]
-      end
-
-      x = gets_command('select X: ') or return
-      y = gets_command('select Y: ') or return
-
-      sync_stones_onto_window
-
-      x, y = x.to_i, y.to_i
-
-      if ss.include? [x, y]
-        [x, y]
-      else
-        nil
-      end
-    end
-
-    def _put start_x, start_y, direction_x, direction_y
-      return if @window[start_x, start_y]
-
-      targets = []
-      trace(start_x, start_y, direction_x, direction_y) do |i, j|
-        if @window[i, j].nil?
-          break
-        elsif @window[i, j].color != @turn_player.color
-          targets << [i, j]
-        elsif @window[i, j].color == @turn_player.color
-          targets.each do |k, l|
-            @stones[k][l] = Stone.new(@turn_player.color)
-          end
-
-          break
-        end
-      end
-    end
-
-    def put
-      x, y = select.tap do |a|
-        return unless a
-      end
-
-      _put(x, y, 1, 0)
-      _put(x, y, 0, 1)
-      _put(x, y, -1, 0)
-      _put(x, y, 0, -1)
-      _put(x, y, 1, 1)
-      _put(x, y, -1, -1)
-      _put(x, y, 1, -1)
-      _put(x, y, -1, 1)
-
-      @stones[x][y] = Stone.new(@turn_player.color)
-      sync_stones_onto_window
-      
-      next_turn
-    end
-
-    def pass
-      next_turn
-    end
-
-    def next_turn
-      @turn_player = @players[@turn_player_n += 1] || @players[@turn_player_n = 0]
-      view_info "next turn is #{@turn_player.color}."
-    end
-
     def start
       @window.paint
 
       while (cmd = gets_command) !~ /^exit/
+        break fin! if @players.all? &:passed
         command(cmd)
         @window.paint
       end
+    end
+
+    def fin!
+      msg = @stones.to_a.flatten.compact.group_by(&:color).map { |color, stones| "%s has %d stones." % [color, stones.count] }.join(" ")
+      view_info "Game set. #{msg}"
+      gets_command "Press any key, finish the game."
     end
   end
 end
