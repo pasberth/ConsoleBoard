@@ -60,9 +60,14 @@ module Othello
 
     def command cmd
       case cmd
+      when /^help/ then help
       when /^put/ then put
       when /^pass/ then pass
       end
+    end
+
+    def help
+      view_info "Type 'put', put a stone onto the board."
     end
 
     def selections
@@ -196,6 +201,7 @@ module Othello
 
     def next_turn
       @turn_player = @players[@turn_player_n += 1] || @players[@turn_player_n = 0]
+      view_info "next turn is #{@turn_player.color}."
     end
 
     def start
