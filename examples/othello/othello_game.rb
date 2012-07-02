@@ -12,7 +12,9 @@ module Othello
 
     def initialize
     
-      @window = ConsoleBoard::BoardWindow.new(BOARD_WIDTH, BOARD_HEIGHT, :curses_window => Curses.stdscr)
+      @screen = ConsoleWindow::Screen.new
+      @window = ConsoleBoard::BoardWindow.new(BOARD_WIDTH, BOARD_HEIGHT, owner: @screen)
+      @screen.components << @window
 
       @window.all_cells.each do |cul|
         cul.each do |cell|
@@ -58,14 +60,14 @@ module Othello
 
     def view_info msg
       @window.lines[INFO_AREA_LINE_N] = msg
-      @window.paint
+      @screen.paint
     end
 
     def gets_command msg = "input command: "
       @window.lines[COMMAND_LINE_N] = msg
       @window.cursor.y = 18
       @window.cursor.x = msg.length
-      @window.paint
+      @screen.paint
       @window.gets
     end
 
@@ -211,12 +213,12 @@ module Othello
     end
 
     def start
-      @window.paint
+      @screen.paint
 
       while (cmd = gets_command) !~ /^exit/
         break fin! if @players.all? &:passed
         command(cmd)
-        @window.paint
+        @screen.paint
       end
     end
 

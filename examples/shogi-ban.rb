@@ -3,7 +3,8 @@ require 'console_board'
 
 begin
   Curses.init_screen
-  window = ConsoleBoard::BoardWindow.new(9, 9, :curses_window => Curses.stdscr)
+  screen = ConsoleWindow::Screen.new
+  window = ConsoleBoard::BoardWindow.new(9, 9)
   window.all_cells.each do |cul|
     cul.each do |cell|
       cell.border.style = %w[ +---+ 
@@ -13,7 +14,8 @@ begin
     end
   end
 
-  window.paint
+  screen.components << window
+  screen.paint
   Curses.getch
 ensure
   Curses.close_screen
