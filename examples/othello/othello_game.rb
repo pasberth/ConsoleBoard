@@ -151,10 +151,17 @@ module Othello
     def _put start_x, start_y, direction_x, direction_y
       return if @window[start_x, start_y]
 
+      targets = []
       trace(start_x, start_y, direction_x, direction_y) do |i, j|
-        if @window[i, j] and @window[i, j].color != @turn_player.color
-          @stones[i][j] = Stone.new(@turn_player.color)
-        elsif @window[i, j].nil? or @window[i, j].color == @turn_player.color
+        if @window[i, j].nil?
+          break
+        elsif @window[i, j].color != @turn_player.color
+          targets << [i, j]
+        elsif @window[i, j].color == @turn_player.color
+          targets.each do |k, l|
+            @stones[k][l] = Stone.new(@turn_player.color)
+          end
+
           break
         end
       end
