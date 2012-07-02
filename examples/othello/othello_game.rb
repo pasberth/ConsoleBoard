@@ -117,10 +117,12 @@ module Othello
       tgt = nil
 
       trace(start_x, start_y, direction_x, direction_y) do |i, j|
-        if @window[i, j].nil? or @window[i, j].color == @turn_player.color
+        if @window[i, j].nil?
           tgt = [i, j]
           break
-        else
+        elsif @window[i, j].color == @turn_player.color
+          break
+        elsif @window[i, j].color != @turn_player.color
           flag = true
         end
       end
