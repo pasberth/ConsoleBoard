@@ -20,7 +20,7 @@ module ConsoleBoard
         raise "auto inference of the width faild.\n" +
               "#{border.top.inspect} != #{border.bottom.inspect}" 
       end
-      border.top.length
+      @width = border.top.length
     end
 
     def height
@@ -32,12 +32,15 @@ module ConsoleBoard
         raise "auto inference of the height faild.\n" +
               "#{border.top.inspect} != #{border.bottom.inspect}"
       end
-      h1 + (h2 * 2)
+      @height = h1 + (h2 * 2)
     end
     
     def cell_as_line
+      return @cell_as_line if @cell_as_line and
+                              @object_to_s == object.to_s
       objw = width - (border.left.length + border.right.length)
-      [border.left, "%#{objw}s" % object.to_s[0 .. objw], border.right].join
+      @object_to_s = object.to_s
+      @cell_as_line = [border.left, "%#{objw}s" % object.to_s[0 .. objw], border.right].join
     end
 
     def lines

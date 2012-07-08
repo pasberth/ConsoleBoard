@@ -13,10 +13,7 @@ module Othello
   require 'othello/othello_game'
 end
 
-begin
-  Curses.init_screen
+ConsoleWindow.start do
   othello = Othello::OthelloGame.new
   othello.start
-ensure
-  Curses.close_screen
 end

@@ -11,6 +11,7 @@ module ConsoleBoard
     def initialize horizontal_length, vertical_length, attritbes = {}
       super(attritbes)
       @all_cells = Array.new(vertical_length) { Array.new(horizontal_length) { Cell.new } }
+      @all_cells_as_text = Array.new(vertical_length) { Array.new(horizontal_length) { nil } }
       @horizontal_length = horizontal_length
       @vertical_length = vertical_length
     end
@@ -27,18 +28,23 @@ module ConsoleBoard
       xs = Array.new(vertical_length) { position.x }
       x = position.x
       y = position.y
-      @all_cells.each do |cul|
+      @all_cells.each_with_index do |cul, i|
         position.y = y
-        cul.each_with_index do |cell, i|
-          position.x = xs[i]
-          print_rect cell.as_text
+        cul.each_with_index do |cell, j|
+          position.x = xs[j]
+          text = cell.as_text
+
+          if @all_cells_as_text[i][j] != text
+            print_rect text
+            @all_cells_as_text[i][j] = text
+          end
 
           if cell.collapse
             position.y += cell.height - 1
-            xs[i] += cell.width - 1
+            xs[j] += cell.width - 1
           else
             position.y += cell.height
-            xs[i] += cell.width
+            xs[j] += cell.width
           end
         end
       end
