@@ -8,8 +8,7 @@ module Othello
     attr_reader :board
     attr_reader :turn_player
 
-    def initialize
-      @board = Board.new(owner: self)
+    def initialize(board)
       @board = board
       @board.table.width = 8
       @board.table.height = 8

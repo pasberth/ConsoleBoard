@@ -19,10 +19,7 @@ module Othello
   WHITE = :white
 end
 
-include ConsoleWindow
-include ConsoleBoard
-
-screen = Screen.new
+screen = ConsoleWindow::Screen.new
 othello = screen.create_sub(Othello::OthelloWindow, 80, 20, 0, 0)
 othello.focus!
 screen.components << othello

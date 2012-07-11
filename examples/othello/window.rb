@@ -9,17 +9,19 @@ module Othello
     def initialize *args, &block
       super
 
-      @othello = Game.new
+      @board = ConsoleBoard::Board.new(owner: self)
+      @othello = Game.new(@board)
 
       frames.on :main do
         @input.focus!
       end
 
-      @info = create_sub(Window, 80, 1, 0, 9)
-      @input = create_sub(Window, 80, 1, 0, 10)
+      @info = create_sub(ConsoleWindow::Window, 80, 1, 0, 9)
+      @input = create_sub(ConsoleWindow::Window, 80, 1, 0, 10)
 
       @input.frames.before :main do
         @input.text = "Input command: "
+        @info.text = "Next turn is #{@othello.turn_player.color}"
       end
 
       help = nil
@@ -49,6 +51,7 @@ module Othello
 
       @input.frames.on :pass do
         @othello.pass
+        @input.unfocus!(:pass)
       end
 
       selected = false
@@ -61,7 +64,7 @@ module Othello
         elsif selected
           selected = false
 
-          x, y = @othello.board.board_cursor.x, @othello.board.board_cursor.y
+          x, y = @board.board_cursor.x, @board.board_cursor.y
           if ss.include? [x, y]
             @info.text = "You put it on (#{x}, #{y})."
             @othello.put(x, y)
@@ -70,7 +73,7 @@ module Othello
             @info.text = "You can't put it at (#{x}, #{y})."
           end
         else
-          @othello.board.focus!(:select)
+          @board.focus!(:select)
           selected = true
         end
       end
