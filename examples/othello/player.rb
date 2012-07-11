@@ -1,59 +1,56 @@
-
 module Othello
 
   class Player
 
+    include Helpers
+
     attr_reader :color
-    attr_accessor :passed
 
     def initialize othello, color
       @othello = othello
       @color = color
     end
-  end
 
-  class Person < Player
+    def selection start_x, start_y, direction_x, direction_y
 
-    def select
-      ss = @othello.selections
-      
-      if ss.empty?
-        @othello.view_info "Selection has not been found. You can't select."
-        return
-      end
+      flag = false
+      tgt = nil
 
-      ss.each do |x, y|
-        @othello.window[x, y] = "%d,%d" % [x, y]
-      end
-
-      @othello.view_info "Select (x,y)."
-
-      x = @othello.gets_command('select X: ') or return
-      y = @othello.gets_command('select Y: ') or return
-
-      @othello.sync_stones_onto_window
-
-      x, y = x.to_i, y.to_i
-
-      if ss.include? [x, y]
-        [x, y]
-      else
-        @othello.view_info("You can't put it at (#{x},#{y}). Do you want reselect? ")
-        case @othello.gets_command("y/N [n]")
-        when /^y/i
-          select
+      trace(start_x, start_y, direction_x, direction_y) do |i, j|
+        if @othello.board.table[i, j].nil?
+          tgt = [i, j]
+          break
+        elsif @othello.board.table[i, j].color == self.color
+          break
+        elsif @othello.board.table[i, j].color != self.color
+          flag = true
         end
-
-        nil
       end
+
+      flag ? tgt : nil
     end
-  end
 
-  class Com < Player
+    def selections
+      selections = []
 
-    def select
-      ss = @othello.selections
-      ss.sample or (@othello.view_info("Selection has not been found."); nil)
+      @othello.board.table.each_row.with_index do |cul, i|
+        cul.each_with_index do |cell, j|
+          stone = cell.object
+          next unless stone
+          next if stone.color != self.color
+
+          selections << selection(i, j, 1, 0)
+          selections << selection(i, j, 0, 1)
+          selections << selection(i, j, -1, 0)
+          selections << selection(i, j, 0, -1)
+          selections << selection(i, j, 1, 1)
+          selections << selection(i, j, -1, -1)
+          selections << selection(i, j, 1, -1)
+          selections << selection(i, j, -1, 1)
+        end
+      end
+
+      selections.compact.uniq
     end
   end
 end

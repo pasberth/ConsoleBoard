@@ -1,6 +1,4 @@
-
 module Othello
-
   class Stone
 
     attr_reader :color
@@ -9,7 +7,7 @@ module Othello
       @color = color
     end
 
-    def to_s
+    def as_string
       case @color
       when BLACK then '@'
       when WHITE then 'O'
