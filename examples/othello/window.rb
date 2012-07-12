@@ -51,28 +51,28 @@ module Othello
         @input.unfocus!(:pass)
       end
 
-      selected = false
-
-      @input.frames.on :put do |; ss, x, y|
+      @input.frames.on :put do |; ss|
         ss = @othello.turn_player.selections
         if ss.empty?
           @info.text = "Selection has not been found. You can't select."
           @input.unfocus!(:put)
-        elsif selected
-          selected = false
-
-          x, y = @board.board_cursor.x, @board.board_cursor.y
-          if ss.include? [x, y]
-            @info.text = "You put it on (#{x}, #{y})."
-            @othello.put(x, y)
-            @input.unfocus!(:put)
-            @input.focus!(:next_turn)
-          else
-            @info.text = "You can't put it at (#{x}, #{y})."
-          end
         else
+          @input.focus!(:put!, ss)
           @board.focus!(:select)
-          selected = true
+        end
+      end
+
+      @input.frames.on :put! do |ss|
+        x, y = @board.board_cursor.x, @board.board_cursor.y
+        if ss.include? [x, y]
+          @info.text = "You put it on (#{x}, #{y})."
+          @othello.put(x, y)
+          @input.unfocus!(:put!)
+          @input.unfocus!(:put)
+          @input.focus!(:next_turn)
+        else
+          @info.text = "You can't put it at (#{x}, #{y})."
+          @input.unfocus!(:put!)
         end
       end
 
