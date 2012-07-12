@@ -21,7 +21,6 @@ module Othello
 
       @input.frames.before :main do
         @input.text = "Input command: "
-        @info.text = "Next turn is #{@othello.turn_player.color}"
       end
 
       help = nil
@@ -69,6 +68,7 @@ module Othello
             @info.text = "You put it on (#{x}, #{y})."
             @othello.put(x, y)
             @input.unfocus!(:put)
+            @input.focus!(:next_turn)
           else
             @info.text = "You can't put it at (#{x}, #{y})."
           end
@@ -76,6 +76,11 @@ module Othello
           @board.focus!(:select)
           selected = true
         end
+      end
+
+      @input.frames.on :next_turn do
+        @info.text = "Next turn is #{@othello.turn_player.color}"
+        @input.unfocus! :next_turn
       end
       
       self.components << @othello.board << @input << @info
