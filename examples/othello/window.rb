@@ -23,18 +23,16 @@ module Othello
         @input.text = "Input command: "
       end
 
-      help = nil
-
       @input.frames.on :main do
         case @input.gets
         when /^put/i then @input.focus!(:put)
-        when /^help\s+(.*)/i then @input.focus!(:help); help = $1
+        when /^help\s+(.*)/i then @input.focus!(:help, $1)
         when /^pass/i then @input.focus!(:pass)
         when /^exit/i then @input.unfocus!; self.unfocus!
         end
       end
 
-      @input.frames.on :help do
+      @input.frames.on :help do |help|
         case help
         when /^put/i
           @info.text = "Put a stone onto the board."
