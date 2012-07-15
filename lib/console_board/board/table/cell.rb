@@ -17,9 +17,12 @@ module ConsoleBoard
         attr_accessor :height
 
         def as_string
-          str = (@object.respond_to?(:as_string) ? @object.as_string : @object.to_s).clone
+          str = (@object.respond_to?(:as_string) ? @object.as_string : @object.to_s)
 
-          1.upto(height).map do |i|
+          return @as_str if @str == str
+          @str = str
+
+          @as_str = 1.upto(height).map do |i|
            if i == (height.to_f / 2).ceil
              "%*s" % [width, str]
            else

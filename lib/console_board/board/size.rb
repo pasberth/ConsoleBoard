@@ -9,19 +9,19 @@ module ConsoleBoard
       end
 
       def width= val
-       # TODO:
+        @width = val
       end
 
       def height= val
-        # TODO:
+        @height = val
       end
 
       def width
-        @board.rows.map { |row| row.sort_by(&:width).last }.compact.inject(0) { |w, cell| w + cell.width }
+        @width or @board.rows.map { |row| row.sort_by(&:width).last }.compact.inject(0) { |w, cell| w + cell.width }
       end
 
       def height
-        @board.culumns.map { |cul| cul.sort_by(&:height).last }.compact.inject(0) { |h, cell| h + cell.height }      
+        @height or @board.culumns.map { |cul| cul.sort_by(&:height).last }.compact.inject(0) { |h, cell| h + cell.height }      
       end
     end
   end

@@ -6,73 +6,113 @@ module ConsoleBoard
 
       require 'console_board/board/table/cell'
 
-      def initialize board, table = []
+      def initialize board, rows = []
         @board = board
-        @table = table
+        @rows = rows
+        @culumns = width.times.map { |x| rows.map { |r| r[x] } }
+        @as_str_buf = []
       end
 
       attr_writer :width
       attr_writer :height
 
       def width
-        @width or @table.length
+        @width or @rows.length
       end
 
       def height
-        @height or (max_row = @table.max) ? max_row.length : 0
+        @height or @culumns.length
       end
 
       def [] x, y
         if x < width && y < height
-          (@table[x][y] ||= Cell.new).object
+          if (@rows[x] ||= [])[y].nil? or (@culumns[y] ||= [])[x].nil?
+            self[x, y] = nil
+          end
+
+          @rows[x][y].object
         else
           nil
         end
       end
 
       def []= x, y, val
-        ((@table[x] ||= [])[y] ||= Cell.new).object = val
+        if (@rows[x] ||= [])[y].nil? or (@culumns[y] ||= [])[x].nil?
+          @rows[x] ||= []
+          @culumns[y] ||= []
+          raise "!!!#{self.class}!!!" if @rows[x][y] or @culumns[y][x]
+          Cell.new.tap do |cell|
+            @rows[x][y] = cell
+            @culumns[y][x] = cell
+          end
+
+        end
+
+        @rows[x][y].object = val
       end
 
       def each_row
-        if block_given?
-          width.times.map do |x|
-            height.times.map do |y|
-              (@table[x] ||= [])[y] ||= Cell.new
-            end
-          end.each do |row|
-            yield row
+        return Enumerator.new(self, :each_row) unless block_given?
+
+        width.times.zip(@rows) do |x, row|
+          if row.nil?
+            row = []
+            @rows[x] = []
           end
 
-          self
-        else
-          Enumerator.new(self, :each_row)
+          if row.length < height
+            height.times do |y|
+              self[x, y] ||= nil
+            end
+          end
+
+          yield row
         end
+
+        self
       end
 
       def each_culumn
-        if block_given?
-          height.times.map do |y|
-            width.times.map do |x|
-              (@table[x] ||= [])[y] ||= Cell.new
-            end
-          end.each do |cul|
-            yield cul
+        return Enumerator.new(self, :each_culumn) unless block_given?
+
+        height.times.zip(@culumns) do |y, cul|
+          if cul.nil?
+            cul = []
+            @culumns[y] = cul
           end
-          self
-        else
-          Enumerator.new(self, :each_culumn)
+
+          if cul.length < width
+            width.times do |x|
+              self[x, y] ||= nil
+            end
+          end
+
+          yield cul
         end
+
+        self
+      end
+
+      def text
+        text = @board.text.clone
+        each_culumn.with_index do |cul, y|
+          l = @as_str_buf[y] ||= []
+          cul.each_with_index do |cell, x|
+            if l[x] != (cell_as_s = cell.as_string)
+              text.paste!(cell.as_string, cell.width * x, cell.height * y)
+              l[x] = cell_as_s
+            end
+          end
+        end
+
+        text
+      end
+
+      def displayed_text
+        text.displayed_text
       end
 
       def as_string
-        text = @board.text.clone
-        each_culumn.with_index do |cul, y|
-          cul.each_with_index do |cell, x|
-            text.paste!(cell.as_string, cell.width * x, cell.height * y)
-          end
-        end
-
         text.as_displayed_string
       end
 
