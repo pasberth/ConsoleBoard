@@ -1,0 +1,3 @@
+[submodule "ConsoleWindow"]
+	path = ConsoleWindow
+	url = git@github.com:pasberth/ConsoleWindow.git
