@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- spec/*`.split("\n")
   s.add_development_dependency "rspec"
   s.add_dependency "console_window"
+  s.add_dependency "paint"
 end

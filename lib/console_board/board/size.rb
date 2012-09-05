@@ -17,11 +17,11 @@ module ConsoleBoard
       end
 
       def width
-        @width or @board.rows.map { |row| row.sort_by(&:width).last }.compact.inject(0) { |w, cell| w + cell.width }
+        @width or @board.rows.inject(0) { |r, row| r + row.width }
       end
 
       def height
-        @height or @board.culumns.map { |cul| cul.sort_by(&:height).last }.compact.inject(0) { |h, cell| h + cell.height }      
+        @height or @board.culumns.inject(0) { |r, cul| r + cul.height }
       end
     end
   end

@@ -7,8 +7,6 @@ describe ConsoleBoard::Board::Table do
 
   its(:width) { should == 0 }
   its(:height) { should == 0 }
-  its(:as_string) { should == "" }
-  its(:as_displayed_string) { should == "" }
   its('each_row.to_a') { should be_empty }
   its('each_culumn.to_a') { should be_empty }
   its([0, 0]) { should be_nil }
@@ -32,28 +30,30 @@ describe ConsoleBoard::Board::Table do
 
   context do
 
-    before do
+    example do
       subject.width = 5
       subject.height = 1
 
-      subject.each_culumn do |culumn|
-        culumn.each { |cell| cell.object = '*' }
+      5.times do |x|
+        subject[x, 0] = '*'
       end
-    end
 
-    its(:as_string) { should == "*****\n" }
+      window.as_string.should == "*****\n"
+    end
   end
 
   context do
 
-    before do
+    example do
       subject.width = 5
       subject.height = 1
-      subject.each_culumn do |cul|
-        cul.each { |cell| cell.width = 3; cell.object = '*' }
-      end
-    end
 
-    its(:as_string) { should == "  *  *  *  *  *\n" }
+      5.times do |x|
+        subject.row(x).width = 3
+        subject[x, 0] = '  *'
+      end
+
+      window.as_string.should == "  *  *  *  *  *\n"
+    end
   end
 end

@@ -5,68 +5,84 @@ module ConsoleBoard
     class Table
 
       require 'console_board/board/table/cell'
+      require 'console_board/board/table/row'
+      require 'console_board/board/table/culumn'
 
-      def initialize board, rows = []
+      def initialize board, width = 0, height = 0
         @board = board
-        @rows = rows
-        @culumns = width.times.map { |x| rows.map { |r| r[x] } }
-        @as_str_buf = []
+        @width = width
+        @height = height
+        @cells = Hash[*width.times.map.with_index { |x|
+                        height.times.map.with_index { |y|
+                          [[x, y], Cell.new] } }.flatten(2)]
+        @rows = []
+        @culumns = []
       end
 
-      attr_writer :width
-      attr_writer :height
-
-      def width
-        @width or @rows.length
-      end
-
-      def height
-        @height or @culumns.length
-      end
+      attr_accessor :width
+      attr_accessor :height
 
       def [] x, y
         if x < width && y < height
-          if (@rows[x] ||= [])[y].nil? or (@culumns[y] ||= [])[x].nil?
-            self[x, y] = nil
-          end
-
-          @rows[x][y].object
+          (@cells[ [x, y] ] ||= Cell.new).object
         else
           nil
         end
       end
 
       def []= x, y, val
-        if (@rows[x] ||= [])[y].nil? or (@culumns[y] ||= [])[x].nil?
-          @rows[x] ||= []
-          @culumns[y] ||= []
-          raise "!!!#{self.class}!!!" if @rows[x][y] or @culumns[y][x]
-          Cell.new.tap do |cell|
-            @rows[x][y] = cell
-            @culumns[y][x] = cell
-          end
+        (@cells[ [x, y] ] ||= Cell.new).object = val
+        modified x, y
+      end
 
+      def cell x, y
+        @cells[ [x, y] ] ||= Cell.new
+      end
+
+      def row x
+        @rows[x] ||= Row.new(width: 1)
+      end
+
+      def culumn y
+        @culumns[y] ||= Culumn.new(height: 1)
+      end
+
+      def modified x, y
+        return unless x < width && y < height
+
+        posx = x.times.inject(0) { |r, x| r + self.row(x).width }
+        posy = y.times.inject(0) { |r, y| r + self.culumn(y).height }
+        row = self.row(x)
+        cul = self.culumn(y)
+        cell = self.cell(x, y)
+        txt = ConsoleWindow::Window::Text.new(@board, cell.as_string).crop(0, 0, row.width, cul.height)
+        @board.text.paste!(txt, posx, posy)
+        true
+      end
+
+      def each_object
+        return Enumerator.new(self, :each_object) unless block_given?
+
+        each_cell do |cell, x, y|
+          yield cell.object, x, y
         end
+      end
 
-        @rows[x][y].object = val
+      def each_cell
+        return Enumerator.new(self, :each_cell) unless block_given?
+
+        width.times do |x|
+          height.times do |y|
+            yield cell(x, y), x, y
+          end
+        end
       end
 
       def each_row
         return Enumerator.new(self, :each_row) unless block_given?
 
-        width.times.zip(@rows) do |x, row|
-          if row.nil?
-            row = []
-            @rows[x] = []
-          end
-
-          if row.length < height
-            height.times do |y|
-              self[x, y] ||= nil
-            end
-          end
-
-          yield row
+        width.times do |x|
+          yield row(x)
         end
 
         self
@@ -75,48 +91,12 @@ module ConsoleBoard
       def each_culumn
         return Enumerator.new(self, :each_culumn) unless block_given?
 
-        height.times.zip(@culumns) do |y, cul|
-          if cul.nil?
-            cul = []
-            @culumns[y] = cul
-          end
-
-          if cul.length < width
-            width.times do |x|
-              self[x, y] ||= nil
-            end
-          end
-
-          yield cul
+        height.times do |y|
+          yield culumn(y)
         end
 
         self
       end
-
-      def text
-        text = @board.text.clone
-        each_culumn.with_index do |cul, y|
-          l = @as_str_buf[y] ||= []
-          cul.each_with_index do |cell, x|
-            if l[x] != (cell_as_s = cell.as_string)
-              text.paste!(cell.as_string, cell.width * x, cell.height * y)
-              l[x] = cell_as_s
-            end
-          end
-        end
-
-        text
-      end
-
-      def displayed_text
-        text.displayed_text
-      end
-
-      def as_string
-        text.as_displayed_string
-      end
-
-      alias as_displayed_string as_string
     end
   end
 end

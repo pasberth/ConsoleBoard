@@ -33,21 +33,18 @@ module Othello
     def selections
       selections = []
 
-      @othello.board.table.each_row.with_index do |cul, i|
-        cul.each_with_index do |cell, j|
-          stone = cell.object
-          next unless stone
-          next if stone.color != self.color
+      @othello.board.table.each_object do |stone, i, j|
+        next unless stone
+        next if stone.color != self.color
 
-          selections << selection(i, j, 1, 0)
-          selections << selection(i, j, 0, 1)
-          selections << selection(i, j, -1, 0)
-          selections << selection(i, j, 0, -1)
-          selections << selection(i, j, 1, 1)
-          selections << selection(i, j, -1, -1)
-          selections << selection(i, j, 1, -1)
-          selections << selection(i, j, -1, 1)
-        end
+        selections << selection(i, j, 1, 0)
+        selections << selection(i, j, 0, 1)
+        selections << selection(i, j, -1, 0)
+        selections << selection(i, j, 0, -1)
+        selections << selection(i, j, 1, 1)
+        selections << selection(i, j, -1, -1)
+        selections << selection(i, j, 1, -1)
+        selections << selection(i, j, -1, 1)
       end
 
       selections.compact.uniq

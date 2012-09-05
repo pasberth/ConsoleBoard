@@ -48,15 +48,5 @@ module ConsoleBoard
     attr_accessor :table
     attr_accessor :rows
     attr_accessor :culumns
-
-    def as_string
-      text.paste!(table.text, 0, 0)
-      text.as_string
-    end
-
-    def as_displayed_string
-      text.paste!(table.displayed_text, 0, 0)
-      text.as_displayed_string
-    end
   end
 end
