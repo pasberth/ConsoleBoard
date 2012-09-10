@@ -18,7 +18,7 @@ module ConsoleBoard
       frames.on :select do
         case getc
         when 27.chr # ESC
-          unfocus!(:select)
+          unfocus!(:select, return_value: [board_cursor.x, board_cursor.y])
         when Curses::Key::RIGHT then board_cursor.right!
         when Curses::Key::LEFT then board_cursor.left!
         when Curses::Key::UP then board_cursor.up!

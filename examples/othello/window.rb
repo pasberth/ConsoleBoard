@@ -13,8 +13,8 @@ module Othello
       @othello = Game.new(@board)
 
       frames.on :main do
-        unfocus! :main
         focus! :command
+        unfocus! :main
       end
 
       @info = create_sub(ConsoleWindow::Window, 80, 1, 0, 9)
@@ -61,13 +61,10 @@ module Othello
             if ss.empty?
               @info.text = "Selection has not been found. You can't select."
               put.unfocus!
-            else
-              @board.focus!(:select)
-              put.focus!(:put!, ss)
+              next
             end
-          end
 
-          put.on :put! do |ss|
+            @board.focus!(:select)
             x, y = @board.board_cursor.x, @board.board_cursor.y
 
             if ss.include? [x, y]
@@ -77,7 +74,6 @@ module Othello
               g.focus!(:next_turn)
             else
               @info.text = "You can't put it at (#{x}, #{y})."
-              put.unfocus!(:put!)
             end
           end
         end
