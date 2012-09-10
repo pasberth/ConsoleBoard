@@ -62,8 +62,8 @@ module Othello
               @info.text = "Selection has not been found. You can't select."
               put.unfocus!
             else
-              put.focus!(:put!, ss)
               @board.focus!(:select)
+              put.focus!(:put!, ss)
             end
           end
 
