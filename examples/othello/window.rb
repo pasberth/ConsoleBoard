@@ -64,8 +64,16 @@ module Othello
               next
             end
 
+            ss.each do |x, y|
+              @board.table[x, y] = "\e[5m*\e[0m"
+            end
+
             @board.focus!(:select)
             x, y = @board.board_cursor.x, @board.board_cursor.y
+
+            ss.each do |x, y|
+              @board.table[x, y] = nil
+            end
 
             if ss.include? [x, y]
               @info.text = "You put it on (#{x}, #{y})."

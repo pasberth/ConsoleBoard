@@ -1,5 +1,3 @@
-require 'paint'
-
 module ConsoleBoard
 
   class Board
@@ -33,14 +31,9 @@ module ConsoleBoard
         end
 
         attr_accessor :object
-        attr_accessor :color
 
         def as_string
-          str = (object.respond_to?(@as_string_method) ? object.send(@as_string_method) : object.to_s)
-          return @as_str if @str == str
-
-          @str = str
-          @as_str = Paint[str, *[color].compact]
+          (object.respond_to?(@as_string_method) ? object.send(@as_string_method) : object.to_s)
         end
       end
     end
