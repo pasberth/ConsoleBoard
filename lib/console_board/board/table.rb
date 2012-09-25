@@ -1,3 +1,5 @@
+require 'text_display'
+
 module ConsoleBoard
 
   class Board
@@ -55,8 +57,10 @@ module ConsoleBoard
         row = self.row(x)
         cul = self.culumn(y)
         cell = self.cell(x, y)
-        txt = ConsoleWindow::Window::Text.new(@board, cell.as_string).crop(0, 0, row.width, cul.height)
-        @board.text.paste!(txt, posx, posy)
+        txt = TextDisplay::Text.new(cell.as_string).crop(0, 0, row.width, cul.height)
+        base = TextDisplay::Text.new(@board.text.as_string)
+        base.paste!(txt, posx, posy)
+        @board.text = base
         true
       end
 
