@@ -68,7 +68,7 @@ module Othello
               @board.table[x, y] = "\e[5m*\e[0m"
             end
 
-            key, x, y = @board.focus!(:select, ['z'])
+            key, x, y = @board.focus!(:select, ["\n", ' '])
 
             ss.each do |x, y|
               @board.table[x, y] = nil
