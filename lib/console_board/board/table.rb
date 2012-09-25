@@ -59,6 +59,7 @@ module ConsoleBoard
         cell = self.cell(x, y)
         txt = TextDisplay::Text.new(cell.as_string).crop(0, 0, row.width, cul.height)
         base = TextDisplay::Text.new(@board.text.as_string)
+        base.paste!(Array.new(cul.height) { " " * row.width }.join("\n"), posx, posy)
         base.paste!(txt, posx, posy)
         @board.text = base
         true
